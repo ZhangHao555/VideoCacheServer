@@ -1,4 +1,4 @@
-package com.ahao.serverstudy.util;
+package com.ahao.videocacheserver.util;
 
 public class StringUtil {
     public static String trimL(String s) {

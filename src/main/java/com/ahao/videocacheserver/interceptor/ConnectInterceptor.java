@@ -1,9 +1,9 @@
-package com.ahao.serverstudy.interceptor;
+package com.ahao.videocacheserver.interceptor;
 
-import com.ahao.serverstudy.util.RequestUtil;
-import com.ahao.serverstudy.HttpRequest;
-import com.ahao.serverstudy.HttpResponse;
-import com.ahao.serverstudy.exception.RequestException;
+import com.ahao.videocacheserver.util.RequestUtil;
+import com.ahao.videocacheserver.HttpRequest;
+import com.ahao.videocacheserver.HttpResponse;
+import com.ahao.videocacheserver.exception.RequestException;
 
 public class ConnectInterceptor implements Interceptor {
 

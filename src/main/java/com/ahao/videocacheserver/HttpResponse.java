@@ -1,7 +1,7 @@
-package com.ahao.serverstudy;
+package com.ahao.videocacheserver;
 
-import com.ahao.serverstudy.util.Constant;
-import com.ahao.serverstudy.util.StringUtil;
+import com.ahao.videocacheserver.util.Constant;
+import com.ahao.videocacheserver.util.StringUtil;
 
 import java.io.InputStream;
 import java.net.Socket;

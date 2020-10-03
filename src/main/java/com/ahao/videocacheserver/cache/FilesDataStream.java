@@ -1,6 +1,6 @@
-package com.ahao.serverstudy.cache;
+package com.ahao.videocacheserver.cache;
 
-import com.ahao.serverstudy.util.CloseUtil;
+import com.ahao.videocacheserver.util.CloseUtil;
 
 import java.io.*;
 import java.util.logging.Level;

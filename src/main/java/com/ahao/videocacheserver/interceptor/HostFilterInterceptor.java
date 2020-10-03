@@ -1,9 +1,9 @@
-package com.ahao.serverstudy.interceptor;
+package com.ahao.videocacheserver.interceptor;
 
 
-import com.ahao.serverstudy.HttpRequest;
-import com.ahao.serverstudy.HttpResponse;
-import com.ahao.serverstudy.util.Constant;
+import com.ahao.videocacheserver.HttpRequest;
+import com.ahao.videocacheserver.HttpResponse;
+import com.ahao.videocacheserver.util.Constant;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

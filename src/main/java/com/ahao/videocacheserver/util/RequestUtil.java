@@ -1,8 +1,8 @@
-package com.ahao.serverstudy.util;
+package com.ahao.videocacheserver.util;
 
 
-import com.ahao.serverstudy.HttpRequest;
-import com.ahao.serverstudy.HttpResponse;
+import com.ahao.videocacheserver.HttpRequest;
+import com.ahao.videocacheserver.HttpResponse;
 
 import java.io.IOException;
 import java.io.InputStream;

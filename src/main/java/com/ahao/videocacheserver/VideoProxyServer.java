@@ -1,10 +1,10 @@
-package com.ahao.serverstudy;
+package com.ahao.videocacheserver;
 
-import com.ahao.serverstudy.interceptor.*;
-import com.ahao.serverstudy.util.CustomURLEncode;
-import com.ahao.serverstudy.cache.DiskLruCache;
-import com.ahao.serverstudy.util.CloseUtil;
-import com.ahao.serverstudy.util.Constant;
+import com.ahao.videocacheserver.interceptor.*;
+import com.ahao.videocacheserver.util.CustomURLEncode;
+import com.ahao.videocacheserver.cache.DiskLruCache;
+import com.ahao.videocacheserver.util.CloseUtil;
+import com.ahao.videocacheserver.util.Constant;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

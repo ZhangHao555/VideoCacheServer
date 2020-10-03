@@ -1,10 +1,10 @@
-package com.ahao.serverstudy.interceptor;
+package com.ahao.videocacheserver.interceptor;
 
-import com.ahao.serverstudy.HttpRequest;
-import com.ahao.serverstudy.ProxyCharset;
-import com.ahao.serverstudy.exception.RequestException;
-import com.ahao.serverstudy.util.Constant;
-import com.ahao.serverstudy.HttpResponse;
+import com.ahao.videocacheserver.HttpRequest;
+import com.ahao.videocacheserver.ProxyCharset;
+import com.ahao.videocacheserver.exception.RequestException;
+import com.ahao.videocacheserver.util.Constant;
+import com.ahao.videocacheserver.HttpResponse;
 
 import java.io.*;
 import java.util.Arrays;

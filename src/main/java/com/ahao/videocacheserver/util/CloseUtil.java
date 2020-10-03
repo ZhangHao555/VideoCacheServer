@@ -1,4 +1,4 @@
-package com.ahao.serverstudy.util;
+package com.ahao.videocacheserver.util;
 
 import java.io.Closeable;
 import java.io.IOException;

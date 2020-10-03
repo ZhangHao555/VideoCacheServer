@@ -1,4 +1,4 @@
-package com.ahao.serverstudy.util;
+package com.ahao.videocacheserver.util;
 
 public class Constant {
     public static final String REAL_HOST_NAME = "RealHostParam";

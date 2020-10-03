@@ -1,4 +1,4 @@
-package com.ahao.serverstudy;
+package com.ahao.videocacheserver;
 
 import java.nio.charset.Charset;
 

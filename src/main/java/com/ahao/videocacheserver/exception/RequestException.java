@@ -1,4 +1,4 @@
-package com.ahao.serverstudy.exception;
+package com.ahao.videocacheserver.exception;
 
 public class RequestException extends Exception{
     private String message;
