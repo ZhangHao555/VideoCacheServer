@@ -3,15 +3,12 @@ package com.ahao.videocacheserver.interceptor;
 import com.ahao.videocacheserver.cache.*;
 import com.ahao.videocacheserver.HttpRequest;
 import com.ahao.videocacheserver.HttpResponse;
-import com.ahao.videocacheserver.ProxyCharset;
 import com.ahao.videocacheserver.exception.RequestException;
+import com.ahao.videocacheserver.util.CloseUtil;
 import com.ahao.videocacheserver.util.Constant;
+import com.ahao.videocacheserver.util.RequestUtil;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -37,14 +34,13 @@ public class CacheInterceptor implements Interceptor {
         int[] range = {0, -1};
         getRequestRange(range, request);
         HttpResponse cacheHeaders = cache.getCacheHeaders(request.getHost(), request.getUrlWithNoParam());
-        if(cacheHeaders == null || cacheHeaders.getTotalLength() == -1){
-            try {
-                HttpResponse response = refreshUrlHeaders(request);
-                cache.cacheHeaders(request.getHost(), request.getUrlWithNoParam(), response);
-            } catch (CloneNotSupportedException | IOException e) {
+        if (cacheHeaders == null || cacheHeaders.getTotalLength() == -1) {
+            HttpResponse response = refreshUrlHeaders(request);
+            if (response == null || !response.isOK()) {
                 cache.clearCacheHeaders(request.getHost(), request.getUrlWithNoParam());
-                throw new RequestException(e.getMessage());
+                throw new RequestException("Refresh Url Header Failed " + response);
             }
+            cache.cacheHeaders(request.getHost(), request.getUrlWithNoParam(), response);
         }
 
         HttpResponse ch = cache.getCacheHeaders(request.getHost(), request.getUrlWithNoParam());
@@ -59,7 +55,7 @@ public class CacheInterceptor implements Interceptor {
 
         if (results == null || results.size() == 0) {
             // cache miss
-            HttpResponse httpResponse = getHttpResponse(chain, request, segmentInfo);
+            HttpResponse httpResponse = getHttpResponse(chain, request, segmentInfo, urlTotalLength);
             logger.log(Level.INFO, "miss cache \n");
             logger.log(Level.INFO, request.getHeadText());
             logger.log(Level.INFO, "get data from net\n");
@@ -80,7 +76,7 @@ public class CacheInterceptor implements Interceptor {
             segmentInfo.setStartByte(range[0]);
             segmentInfo.setEndByte(missEndBytes - 1);
 
-            HttpResponse httpResponse = getHttpResponse(chain, request, segmentInfo);
+            HttpResponse httpResponse = getHttpResponse(chain, request, segmentInfo, urlTotalLength);
             logger.log(Level.INFO, "miss cache \n");
             logger.log(Level.INFO, request.getHeadText());
             logger.log(Level.INFO, "get data from net\n");
@@ -90,7 +86,7 @@ public class CacheInterceptor implements Interceptor {
 
         // cache hit
         int hitCacheStart = range[0];
-        int hitCacheEnd =  range[0];
+        int hitCacheEnd = range[0];
         List<File> cacheFiles = new ArrayList<>();
         int skip = 0;
         for (int i = 0; i < results.size(); i++) {
@@ -117,7 +113,7 @@ public class CacheInterceptor implements Interceptor {
         response.setProtocol(Constant.HTTP_VERSION_1_1);
         response.setStatusCode(isPartialContent ? 206 : 200);
         response.setStatusString(isPartialContent ? Constant.Partial_Content : Constant.OK);
-        response.getHeaders().put(Constant.CONNECTION, "keep-alive");
+        response.getHeaders().put(Constant.CONNECTION, "close");
         response.getHeaders().put(Constant.CONTENT_LENGTH, hitCacheEnd - hitCacheStart + 1 + "");
         response.getHeaders().put(Constant.ACCEPT_RANGES, "bytes");
         response.getHeaders().put(Constant.CONTENT_RANGE,
@@ -150,13 +146,18 @@ public class CacheInterceptor implements Interceptor {
 
     }
 
-    private HttpResponse getHttpResponse(Chain chain, HttpRequest request, SegmentInfo segmentInfo) throws RequestException {
+    private HttpResponse getHttpResponse(Chain chain, HttpRequest request, SegmentInfo segmentInfo, int urlTotalLength) throws RequestException {
         int start = segmentInfo.getStartByte();
         int end = segmentInfo.getEndByte();
 
-        request.getHeaders().put(Constant.RANGE, String.format("bytes=%d-%d", start, end));
+        if (start == 0 && end == urlTotalLength - 1) {
+            request.getHeaders().remove(Constant.RANGE);
+        } else {
+            request.getHeaders().put(Constant.RANGE, String.format("bytes=%d-%d", start, end));
+        }
 
         HttpResponse proceed = chain.proceed(request);
+
         if (!proceed.isOK()) {
             throw new RequestException("request is not ok :" + proceed.getHeadText());
         }
@@ -165,35 +166,20 @@ public class CacheInterceptor implements Interceptor {
 
         BlockListFile blockList = cache.put(segmentInfo, proceed.getContent());
         if (blockList == null) {
-            return HttpResponse.get302Response(request.getHost() ,request.getUrl(),request.getHostPort());
+            return HttpResponse.get302Response(request.getHost(), request.getUrl(), request.getHostPort());
         }
 
         proceed.setContent(new FilesDataStream(blockList, blockList.getTotalLength()));
         return proceed;
     }
 
-    private HttpResponse refreshUrlHeaders(HttpRequest request) throws CloneNotSupportedException, IOException, RequestException {
-        HttpRequest cloneRequest = (HttpRequest) request.clone();
-
-        int port = 80;
-        try {
-            port = Integer.parseInt(cloneRequest.getHeaders().get(Constant.HOST_PORT));
-        } catch (Exception ignored) {
+    private HttpResponse refreshUrlHeaders(HttpRequest request) {
+        HttpResponse response = RequestUtil.getHttpResponseFromNet(request);
+        if (response == null) {
+            return null;
         }
-
-        Socket socket = new Socket(cloneRequest.getHost(), port);
-        OutputStream outputStream = socket.getOutputStream();
-        InputStream inputStream = socket.getInputStream();
-
-        outputStream.write(cloneRequest.getHeadText().getBytes(ProxyCharset.CUR_CHARSET));
-        outputStream.flush();
-
-        HttpResponse parse = HttpResponse.parse(inputStream);
-        socket.close();
-        if (!parse.isOK()) {
-            throw new RequestException("request is not ok :" + parse.getHeadText());
-        }
-        return parse;
+        CloseUtil.close(response.getSocket());
+        return response;
     }
 
 }

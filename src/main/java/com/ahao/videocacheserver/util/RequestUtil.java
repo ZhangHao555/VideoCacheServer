@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,22 +17,49 @@ public class RequestUtil {
     public static HttpResponse getHttpResponseFromNet(HttpRequest request) {
         Socket socket;
         HttpResponse response = null;
-        try {
-            int port = 80;
+        HttpRequest re = request;
+        boolean redirect;
+        do {
             try {
-                port = Integer.parseInt(request.getHeaders().get(Constant.HOST_PORT));
-            } catch (Exception ignored) {
+                int port = 80;
+                try {
+                    port = Integer.parseInt(re.getHeaders().get(Constant.HOST_PORT));
+                } catch (Exception ignored) {
+                }
+                socket = new Socket(re.getHost(), port);
+                InputStream inputStream = socket.getInputStream();
+                OutputStream outputStream = socket.getOutputStream();
+                outputStream.write(re.getHeadText().getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+                response = HttpResponse.parse(inputStream);
+                response.setSocket(socket);
+
+                redirect = response.getStatusCode() == 301 || response.getStatusCode() == 302 || response.getStatusCode() == 303;
+
+                if (redirect) {
+                    String location = response.getHeaders().get(Constant.LOCATION);
+                    if (!StringUtil.isEmpty(location)) {
+                        URL url = new URL(location);
+                        re = new HttpRequest();
+                        re.setMethod(Constant.METHOD_GET);
+                        re.setProtocol(Constant.HTTP_VERSION_1_1);
+                        re.setUrl(url.getPath());
+                        re.setHost(url.getHost());
+                        int redirectPort = url.getPort();
+                        if (redirectPort == -1) {
+                            redirectPort = 80;
+                        }
+                        re.getHeaders().put(Constant.HOST_PORT, String.valueOf(redirectPort));
+                    }
+                    socket.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                break;
             }
-            socket = new Socket(request.getHost(), port);
-            InputStream inputStream = socket.getInputStream();
-            OutputStream outputStream = socket.getOutputStream();
-            outputStream.write(request.getHeadText().getBytes(StandardCharsets.UTF_8));
-            outputStream.flush();
-            response = HttpResponse.parse(inputStream);
-            response.setSocket(socket);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        } while (redirect);
+
         return response;
     }
 

@@ -3,6 +3,7 @@ package com.ahao.videocacheserver.cache;
 import com.ahao.videocacheserver.HttpResponse;
 import com.ahao.videocacheserver.ProxyCharset;
 import com.ahao.videocacheserver.util.CloseUtil;
+import com.ahao.videocacheserver.util.StringUtil;
 
 import java.io.*;
 import java.util.*;
@@ -154,8 +155,8 @@ public class DiskLruCache {
             BlockListFile blockList = new BlockListFile();
             blockList.setTotalLength(pendingCacheLength);
             service.submit(() -> {
-                for (SegmentInfo segmentKey : keys) {
-                    File f = writeToFile(inputStream, segmentKey);
+                for (SegmentInfo info : keys) {
+                    File f = writeToFile(inputStream, info);
                     blockList.server(f);
                 }
                 blockList.destroy();
@@ -229,7 +230,7 @@ public class DiskLruCache {
 
         int lastFindToCombine = -1;
         if (list != null && list.length > 0) {
-            Arrays.sort(list);
+            StringUtil.sort(list);
             for (int i = 0; i < list.length; i++) {
                 String fileName = list[i];
                 String[] ranges = fileName.split("_");
@@ -252,7 +253,7 @@ public class DiskLruCache {
 
     private void combineFile(String f1, String f2) {
         File file1 = new File(f1);
-        File file2 = new File(f1);
+        File file2 = new File(f2);
 
         int startRange = Integer.parseInt(f1.split("_")[0]);
         int endRange = Integer.parseInt(f2.split("_")[1]);
@@ -322,7 +323,7 @@ public class DiskLruCache {
         rLock.lock();
         try {
             File parentFile = getContentParentFile(segmentInfo.getHost(), segmentInfo.getUrl());
-            if(!parentFile.exists()){
+            if (!parentFile.exists()) {
                 return null;
             }
 

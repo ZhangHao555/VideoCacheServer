@@ -36,7 +36,6 @@ public class FilesDataStream extends InputStream {
         if (pos >= totalLength) {
             return -1;
         }
-
         if (curIsFirstFile) {
             File f = files.consume();
             bis = new BufferedInputStream(new FileInputStream(f));
@@ -61,7 +60,10 @@ public class FilesDataStream extends InputStream {
                 read = bis.read();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "read exception", e);
+            CloseUtil.close(bis);
+            bis = null;
+
         }
 
         pos++;

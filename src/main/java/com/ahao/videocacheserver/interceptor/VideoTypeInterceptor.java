@@ -3,6 +3,7 @@ package com.ahao.videocacheserver.interceptor;
 import com.ahao.videocacheserver.HttpRequest;
 import com.ahao.videocacheserver.ProxyCharset;
 import com.ahao.videocacheserver.exception.RequestException;
+import com.ahao.videocacheserver.util.CloseUtil;
 import com.ahao.videocacheserver.util.Constant;
 import com.ahao.videocacheserver.HttpResponse;
 
@@ -62,11 +63,13 @@ public class VideoTypeInterceptor implements Interceptor {
                 response.setContent(new ByteArrayInputStream(baos.toByteArray()));
                 response.setContentLength(baos.size());
                 response.getHeaders().put(Constant.CONTENT_RANGE, String.format("%d-%d/%d", 0, baos.size() - 1, baos.size()));
+
+                CloseUtil.close(reader);
             }
         } catch (Exception e) {
             throw new RequestException(e.getMessage());
         }
-        return response;
+       return response;
     }
 
 

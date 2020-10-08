@@ -68,15 +68,15 @@ public class VideoProxyServer {
             URL u = new URL(url);
             String realHost = u.getHost();
             int realPort = u.getPort();
-            if(realPort == -1){
+            if (realPort == -1) {
                 realPort = 80;
             }
             String proxyHostPort = proxyAddr + ":" + port;
             url = url.replace("https", "http");
 
-            if(url.contains(realHost + ":" + realPort)){
+            if (url.contains(realHost + ":" + realPort)) {
                 url = url.replace(realHost + ":" + realPort, proxyHostPort);
-            }else{
+            } else {
                 url = url.replace(realHost, proxyHostPort);
             }
             return url + ((url.contains("?") ? "&" : "?") + Constant.REAL_HOST_NAME + "=" + realHost + ":" + realPort);
@@ -94,15 +94,15 @@ public class VideoProxyServer {
             URL u = new URL(encodeUrl);
             String realHost = u.getHost();
             int realPort = u.getPort();
-            if(realPort == -1){
+            if (realPort == -1) {
                 realPort = 80;
             }
             String proxyHostPort = proxyAddr + ":" + curPort;
             encodeUrl = encodeUrl.replace("https", "http");
 
-            if(encodeUrl.contains(realHost + ":" + realPort)){
+            if (encodeUrl.contains(realHost + ":" + realPort)) {
                 encodeUrl = encodeUrl.replace(realHost + ":" + realPort, proxyHostPort);
-            }else{
+            } else {
                 encodeUrl = encodeUrl.replace(realHost, proxyHostPort);
             }
             return encodeUrl + ((encodeUrl.contains("?") ? "&" : "?") + Constant.REAL_HOST_NAME + "=" + realHost + ":" + realPort);
@@ -144,7 +144,7 @@ public class VideoProxyServer {
         private HttpResponse getResponseWithInterceptorChain(HttpRequest realRequest) {
             List<Interceptor> interceptors = new ArrayList<>();
             interceptors.add(new VideoTypeInterceptor());
-            interceptors.add(new HostFilterInterceptor());
+            interceptors.add(new HostFilterInterceptor(curPort));
             interceptors.add(new CacheInterceptor(diskCache));
             interceptors.add(new ConnectInterceptor());
             InterceptorChain interceptorChain = new InterceptorChain(interceptors, realRequest, 0);
@@ -158,7 +158,7 @@ public class VideoProxyServer {
                 InputStream content = response.getContent();
                 if (content != null) {
                     BufferedInputStream bufferedInputStream = new BufferedInputStream(content);
-                    byte[] buf = new byte[1024 * 1024];
+                    byte[] buf = new byte[1024 * 512];
                     int readLength;
 
                     while ((readLength = bufferedInputStream.read(buf, 0, buf.length)) != -1) {
@@ -187,8 +187,6 @@ public class VideoProxyServer {
         int start = videoProxyServer.start();
         String proxyUrl = videoProxyServer.getLocalProxyUrl("http://vfx.mtime.cn/Video/2019/03/19/mp4/190319222227698228.mp4");
         System.out.println(proxyUrl);
-
-
     }
 
 }

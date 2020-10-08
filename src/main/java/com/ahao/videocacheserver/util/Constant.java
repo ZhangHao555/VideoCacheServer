@@ -19,4 +19,5 @@ public class Constant {
     public static final String HTTP_VERSION_1_1 = "HTTP/1.1";
     public static final String LOCATION = "Location";
     public static final String REFERER = "Referer";
+    public static final String METHOD_GET = "GET";
 }

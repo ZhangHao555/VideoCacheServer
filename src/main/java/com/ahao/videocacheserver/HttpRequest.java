@@ -97,6 +97,10 @@ public class HttpRequest implements Cloneable {
         return headers.get(Constant.HOST);
     }
 
+    public String setHost(String host) {
+        return headers.put(Constant.HOST, host);
+    }
+
     public String getHostPort() {
         return headers.get(Constant.HOST_PORT);
     }

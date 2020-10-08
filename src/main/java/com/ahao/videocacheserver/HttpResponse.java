@@ -167,7 +167,12 @@ public class HttpResponse {
         return response;
     }
 
+    @Override
+    public String toString() {
+        return getHeadText();
+    }
+
     public boolean isOK() {
-        return statusCode < 400;
+        return statusCode < 300 && statusCode >= 200;
     }
 }

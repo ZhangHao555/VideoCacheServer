@@ -26,11 +26,6 @@ public class BlockListFile implements ListFile {
     public synchronized void server(File file) {
         files.add(file);
         notify();
-        try {
-            Thread.sleep(50);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     public synchronized void destroy() {
