@@ -22,17 +22,17 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class VideoProxyServer {
+public class VideoCacheServer {
 
-    private static final Logger logger = Logger.getLogger("VideoProxyServer");
+    private static final Logger logger = Logger.getLogger("VideoCacheServer");
     private DiskLruCache diskCache;
     private ExecutorService singleService = Executors.newSingleThreadExecutor();
     private ExecutorService pool = Executors.newFixedThreadPool(20);
     private boolean isRunning = false;
     private int curPort;
 
-    public VideoProxyServer(String cachePath, int maxCacheSize) {
-        diskCache = new DiskLruCache(cachePath, maxCacheSize);
+    public VideoCacheServer(String cachePath, int maxCacheSize) {
+        diskCache = new DiskLruCache(cachePath, maxCacheSize, 1024 * 1024 * 20);
     }
 
     public int start() {
@@ -41,18 +41,25 @@ public class VideoProxyServer {
         }
         curPort = new Random().nextInt(65535);
         try {
-            ServerSocket server = new ServerSocket(curPort);
+            final ServerSocket server = new ServerSocket(curPort);
             isRunning = true;
-            singleService.submit(() -> {
-                while (isRunning) {
-                    try {
-                        Socket connection = server.accept();
-                        connection.setKeepAlive(true);
-                        pool.submit(new ProxyHandler(connection));
-                    } catch (IOException ex) {
-                        logger.log(Level.WARNING, "Exception accepting connection", ex);
-                    } catch (RuntimeException ex) {
-                        logger.log(Level.SEVERE, "Unexpected error", ex);
+            singleService.submit(new Runnable() {
+                @Override
+                public void run() {
+                    while (isRunning) {
+                        try {
+                            Socket connection = server.accept();
+                            connection.setKeepAlive(true);
+                            pool.submit(new ProxyHandler(connection));
+                        } catch (IOException ex) {
+                            if (Constant.enableLog) {
+                                logger.log(Level.WARNING, "Exception accepting connection", ex);
+                            }
+                        } catch (Exception ex) {
+                            if (Constant.enableLog) {
+                                logger.log(Level.SEVERE, "Unexpected error", ex);
+                            }
+                        }
                     }
                 }
             });
@@ -135,7 +142,9 @@ public class VideoProxyServer {
                 writeResponseAndClose(response, outputStream);
 
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "error proxy ", e);
+                if (Constant.enableLog) {
+                    logger.log(Level.SEVERE, "error proxy ", e);
+                }
             } finally {
                 CloseUtil.close(realClientSocket);
             }
@@ -168,10 +177,10 @@ public class VideoProxyServer {
                 } else {
                     outputStream.write("\r\n".getBytes(ProxyCharset.CUR_CHARSET));
                 }
-
             } catch (IOException e) {
-                logger.log(Level.SEVERE, "response to real server error ", e);
-                e.printStackTrace();
+                if (Constant.enableLog) {
+                    logger.log(Level.SEVERE, "response to real server error ", e);
+                }
             } finally {
                 CloseUtil.close(outputStream);
                 CloseUtil.close(response.getContent());
@@ -181,12 +190,12 @@ public class VideoProxyServer {
         }
 
     }
-
+/*
     public static void main(String[] args) {
-        VideoProxyServer videoProxyServer = new VideoProxyServer("D:\\cache", 1024 * 1024 * 500);
+        VideoCacheServer videoProxyServer = new VideoCacheServer("D:\\cache", 1024 * 1024 * 500);
         int start = videoProxyServer.start();
-        String proxyUrl = videoProxyServer.getLocalProxyUrl("http://vfx.mtime.cn/Video/2019/03/19/mp4/190319222227698228.mp4");
+        String proxyUrl = videoProxyServer.getLocalProxyUrl("https://qotest.qsxt.info/live_record_186_1590149574858.mp4");
         System.out.println(proxyUrl);
-    }
+    }*/
 
 }

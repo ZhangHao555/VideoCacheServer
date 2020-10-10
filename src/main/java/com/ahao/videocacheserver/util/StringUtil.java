@@ -48,13 +48,4 @@ public class StringUtil {
         return s == null || s.length() == 0;
     }
 
-    public static void sort(String[] list) {
-        Arrays.sort(list, (o1, o2) -> {
-            if (o1.length() == o2.length()) {
-                return o1.compareTo(o2);
-            } else {
-                return Integer.compare(o1.length(), o2.length());
-            }
-        });
-    }
 }

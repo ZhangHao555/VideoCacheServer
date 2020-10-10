@@ -56,10 +56,12 @@ public class CacheInterceptor implements Interceptor {
         if (results == null || results.size() == 0) {
             // cache miss
             HttpResponse httpResponse = getHttpResponse(chain, request, segmentInfo, urlTotalLength);
-            logger.log(Level.INFO, "miss cache \n");
-            logger.log(Level.INFO, request.getHeadText());
-            logger.log(Level.INFO, "get data from net\n");
-            logger.log(Level.INFO, httpResponse.getHeadText());
+            if (Constant.enableLog) {
+                logger.log(Level.INFO, "miss cache \n");
+                logger.log(Level.INFO, request.getHeadText());
+                logger.log(Level.INFO, "get data from net\n");
+                logger.log(Level.INFO, httpResponse.getHeadText());
+            }
             return httpResponse;
         }
 
@@ -77,10 +79,12 @@ public class CacheInterceptor implements Interceptor {
             segmentInfo.setEndByte(missEndBytes - 1);
 
             HttpResponse httpResponse = getHttpResponse(chain, request, segmentInfo, urlTotalLength);
-            logger.log(Level.INFO, "miss cache \n");
-            logger.log(Level.INFO, request.getHeadText());
-            logger.log(Level.INFO, "get data from net\n");
-            logger.log(Level.INFO, httpResponse.getHeadText());
+            if (Constant.enableLog) {
+                logger.log(Level.INFO, "miss cache \n");
+                logger.log(Level.INFO, request.getHeadText());
+                logger.log(Level.INFO, "get data from net\n");
+                logger.log(Level.INFO, httpResponse.getHeadText());
+            }
             return httpResponse;
         }
 
@@ -122,8 +126,10 @@ public class CacheInterceptor implements Interceptor {
                         hitCacheEnd,
                         urlTotalLength));
         response.setContent(new FilesDataStream(new CommonListFile(cacheFiles), skip, hitCacheEnd - hitCacheStart + 1));
-        logger.log(Level.INFO, "cache hit : \n");
-        logger.log(Level.INFO, response.getHeadText());
+        if (Constant.enableLog) {
+            logger.log(Level.INFO, "cache hit : \n");
+            logger.log(Level.INFO, response.getHeadText());
+        }
         return response;
     }
 

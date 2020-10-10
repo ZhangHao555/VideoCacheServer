@@ -20,4 +20,11 @@ public class Constant {
     public static final String LOCATION = "Location";
     public static final String REFERER = "Referer";
     public static final String METHOD_GET = "GET";
+
+    public static boolean enableLog = false;
+
+    public static final int CACHE_SLICE_5MB = 1024 * 1024 * 5;
+    public static final int CACHE_SLICE_10MB = 1024 * 1024 * 10;
+    public static final int CACHE_SLICE_20MB = 1024 * 1024 * 20;
+
 }

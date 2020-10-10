@@ -8,6 +8,7 @@ public class BlockListFile implements ListFile {
     private Vector<File> files = new Vector<>();
     private volatile boolean isDestroy = false;
     private int totalLength = 0;
+    private int maxHolderFile = 2;
 
     public synchronized File consume() {
         if (files.isEmpty() && isDestroy) {
@@ -20,10 +21,21 @@ public class BlockListFile implements ListFile {
                 e.printStackTrace();
             }
         }
-        return files.remove(0);
+        File remove = files.remove(0);
+        if (files.size() < maxHolderFile) {
+            notify();
+        }
+        return remove;
     }
 
     public synchronized void server(File file) {
+        while (files.size() >= maxHolderFile) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         files.add(file);
         notify();
     }
@@ -39,4 +51,5 @@ public class BlockListFile implements ListFile {
     public void setTotalLength(int totalLength) {
         this.totalLength = totalLength;
     }
+
 }

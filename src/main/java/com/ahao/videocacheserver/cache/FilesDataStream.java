@@ -1,6 +1,7 @@
 package com.ahao.videocacheserver.cache;
 
 import com.ahao.videocacheserver.util.CloseUtil;
+import com.ahao.videocacheserver.util.Constant;
 
 import java.io.*;
 import java.util.logging.Level;
@@ -38,10 +39,12 @@ public class FilesDataStream extends InputStream {
         }
         if (curIsFirstFile) {
             File f = files.consume();
+            if (f == null || !f.exists()) {
+                return -1;
+            }
             bis = new BufferedInputStream(new FileInputStream(f));
             bis.skip(startOffset);
             curIsFirstFile = false;
-            logger.log(Level.INFO, "skip " + startOffset + " bytes");
         }
         if (bis == null) {
             return -1;
@@ -50,9 +53,9 @@ public class FilesDataStream extends InputStream {
         try {
             read = bis.read();
             if (read == -1) {
-                bis.close();
+                CloseUtil.close(bis);
                 File consumeFile = files.consume();
-                if (consumeFile == null) {
+                if (consumeFile == null || !consumeFile.exists()){
                     bis = null;
                     return -1;
                 }
@@ -60,7 +63,9 @@ public class FilesDataStream extends InputStream {
                 read = bis.read();
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "read exception", e);
+            if(Constant.enableLog){
+                logger.log(Level.SEVERE, "read exception", e);
+            }
             CloseUtil.close(bis);
             bis = null;
 

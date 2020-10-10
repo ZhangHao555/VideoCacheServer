@@ -51,8 +51,10 @@ public class HostFilterInterceptor implements Interceptor {
                 request.getHeaders().put(Constant.REFERER, referer);
             }
 
-            logger.log(Level.INFO, "after host filter \n");
-            logger.log(Level.INFO, request.getHeadText());
+            if (Constant.enableLog) {
+                logger.log(Level.INFO, "after host filter \n");
+                logger.log(Level.INFO, request.getHeadText());
+            }
             return chain.proceed(request);
         }
     }
