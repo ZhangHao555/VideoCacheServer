@@ -15,9 +15,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class DiskLruCache {
     private String cachePath;
-    private ExecutorService service = Executors.newFixedThreadPool(1);
+    private final ExecutorService service = Executors.newFixedThreadPool(1);
 
-    private int maxSize;
+    private final int maxSize;
 
     private final static float TRIM_FACTOR = 0.75f;
 
@@ -25,7 +25,7 @@ public class DiskLruCache {
     private final Lock rLock = rwLock.readLock();
     private final Lock wLock = rwLock.writeLock();
     private volatile int curTotalSize;
-    private String NAME_SEPARATOR = "_";
+    private final String NAME_SEPARATOR = "_";
 
     private final int cacheSlice;
 
